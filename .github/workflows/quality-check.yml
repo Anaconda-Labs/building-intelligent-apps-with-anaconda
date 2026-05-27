@@ -1,0 +1,20 @@
+name: Quality Check
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'README.md'
+      - '*environment.yml'
+      - '**/*environment.yml'
+      - 'pixi.toml'
+      - 'LICENSE'
+  pull_request:
+    branches: [main]
+
+jobs:
+  quality-check:
+    uses: Anaconda-Labs/criteria_checker/.github/workflows/quality-check-callable.yml@main
+    with:
+      resource_type: guide
+      criteria_checker_owner: Anaconda-Labs
