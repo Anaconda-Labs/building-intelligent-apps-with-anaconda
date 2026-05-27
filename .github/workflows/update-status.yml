@@ -1,6 +1,6 @@
 name: Update Status (Owner Certification)
 
-on:
+"on":
   workflow_dispatch:
     inputs:
       tested:
@@ -135,24 +135,17 @@ jobs:
           # Create pull request
           pr_url = f'{repo_url}/pulls'
           pr_title = f'Update status for {repo_name}'
-          pr_body = f"""## Owner Certification Update
-
-Resource: **{org_name}/{repo_name}**
-Date: **{today}**
-
-### Changes:
-- Updated `last_tested` to {today}
-"""
+          pr_body = "## Owner Certification Update\n\n"
+          pr_body += f"Resource: __{org_name}/{repo_name}__\n"
+          pr_body += f"Date: __{today}__\n\n"
+          pr_body += "### Changes:\n"
+          pr_body += f"- Updated `last_tested` to {today}\n"
           if status_changed:
-              pr_body += f"- Changed status from `needs_review` to `active`\n"
+              pr_body += "- Changed status from `needs_review` to `active`\n"
 
-          pr_body += f"""
-### Certification
-
-This PR was automatically created by the owner certification workflow after the resource owner confirmed they have run the resource end-to-end and it works correctly.
-
-**Workflow run:** https://github.com/{org_name}/{repo_name}/actions/runs/{os.environ.get('GITHUB_RUN_ID', 'unknown')}
-"""
+          pr_body += "\n### Certification\n\n"
+          pr_body += "This PR was automatically created by the owner certification workflow after the resource owner confirmed they have run the resource end-to-end and it works correctly.\n\n"
+          pr_body += f"__Workflow run:__ https://github.com/{org_name}/{repo_name}/actions/runs/{os.environ.get('GITHUB_RUN_ID', 'unknown')}\n"
 
           pr_r = requests.post(pr_url, headers=headers, json={
               'title': pr_title,
