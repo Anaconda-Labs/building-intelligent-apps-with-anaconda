@@ -1,0 +1,107 @@
+name: Update Status (Owner Certification)
+
+on:
+  workflow_dispatch:
+    inputs:
+      tested:
+        description: 'I confirm I have run this resource end-to-end and it works correctly'
+        type: boolean
+        required: true
+
+jobs:
+  update-registry:
+    name: Record successful test
+    runs-on: ubuntu-latest
+    if: ${{ inputs.tested == true }}
+    env:
+      REGISTRY_OWNER: ${{ vars.REGISTRY_OWNER || 'Anaconda-Labs' }}
+      REGISTRY_REPO: ${{ vars.REGISTRY_REPO || 'resource-registry' }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.REGISTRY_TOKEN }}
+
+      - name: Update last_tested date in registry
+        env:
+          REGISTRY_TOKEN: ${{ secrets.REGISTRY_TOKEN }}
+          REPO_NAME: ${{ github.event.repository.name }}
+          ORG_NAME: ${{ github.event.repository.owner.login }}
+          REGISTRY_OWNER: ${{ vars.REGISTRY_OWNER || 'Anaconda-Labs' }}
+          REGISTRY_REPO: ${{ vars.REGISTRY_REPO || 'resource-registry' }}
+        run: |
+          python - << 'EOF'
+          import requests, os, yaml, base64, json
+          from datetime import datetime
+
+          token = os.environ['REGISTRY_TOKEN']
+          repo_name = os.environ['REPO_NAME']
+          org_name = os.environ['ORG_NAME']
+          today = datetime.today().strftime('%Y-%m-%d')
+
+          # Determine registry repo location from environment variables
+          REGISTRY_OWNER = os.environ['REGISTRY_OWNER']
+          REGISTRY_REPO = os.environ['REGISTRY_REPO']
+
+          headers = {
+              'Authorization': f'Bearer {token}',
+              'Accept': 'application/vnd.github+json',
+          }
+
+          # Fetch current registry.yml
+          url = f'https://api.github.com/repos/{REGISTRY_OWNER}/{REGISTRY_REPO}/contents/registry.yml'
+          r = requests.get(url, headers=headers)
+          r.raise_for_status()
+          file_info = r.json()
+          content = base64.b64decode(file_info['content']).decode('utf-8')
+          sha = file_info['sha']
+
+          data = yaml.safe_load(content)
+
+          # Find and update this resource
+          updated = False
+          for resource in data['resources']:
+              if resource['repo'] == repo_name and resource['org'] == org_name:
+                  resource['last_tested'] = today
+                  if resource['status'] == 'needs_review':
+                      resource['status'] = 'active'
+                      resource['status_since'] = today
+                  updated = True
+                  print(f"Updated {org_name}/{repo_name} last_tested to {today}")
+                  break
+
+          if not updated:
+              print(f"Warning: {org_name}/{repo_name} not found in registry")
+              exit(1)
+
+          # Commit updated registry.yml
+          new_content = yaml.dump(data, default_flow_style=False, sort_keys=False, allow_unicode=True)
+          commit_r = requests.put(url, headers=headers, json={
+              'message': f'chore: update last_tested for {repo_name} ({today})',
+              'content': base64.b64encode(new_content.encode()).decode(),
+              'sha': sha,
+          })
+          commit_r.raise_for_status()
+          print(f"Registry updated successfully.")
+          EOF
+
+      - name: Update local status badge and README
+        run: |
+          # Update badge JSON
+          mkdir -p .github/badges
+          echo '{"schemaVersion":1,"label":"status","message":"active","color":"brightgreen"}' \
+            > .github/badges/status.json
+
+          # Update README with cache-busting timestamp
+          TIMESTAMP=$(date +%s)
+          sed -i.bak "s|status\.json?[0-9]*&cacheSeconds|status.json?${TIMESTAMP}\&cacheSeconds|g" README.md
+          rm README.md.bak
+
+      - name: Commit badge and README update
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add .github/badges/status.json README.md
+          git diff --staged --quiet || git commit -m "chore: update status badge to active [skip ci]"
+          git push
