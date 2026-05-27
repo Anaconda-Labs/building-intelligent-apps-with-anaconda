@@ -151,7 +151,7 @@ Date: **{today}**
 
 This PR was automatically created by the owner certification workflow after the resource owner confirmed they have run the resource end-to-end and it works correctly.
 
-**Workflow run:** https://github.com/{org_name}/{repo_name}/actions/runs/${{os.environ.get('GITHUB_RUN_ID', 'unknown')}}
+**Workflow run:** https://github.com/{org_name}/{repo_name}/actions/runs/{os.environ.get('GITHUB_RUN_ID', 'unknown')}
 """
 
           pr_r = requests.post(pr_url, headers=headers, json={
