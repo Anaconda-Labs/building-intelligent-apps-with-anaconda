@@ -1,5 +1,7 @@
 # 🚀 Building Intelligent Apps with Anaconda
 
+[![Status](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Anaconda-Labs/building-intelligent-apps-with-anaconda/main/.github/badges/status.json?0&cacheSeconds=300)](https://github.com/Anaconda-Labs/building-intelligent-apps-with-anaconda)
+
 > **Mission status: Ready for lift-off**
 
 A hands-on curriculum for building production-grade intelligent applications with the Anaconda ecosystem. Every module is a self-contained < 7-minute narrated demo with pre-run outputs or script `run_demo.sh` — designed to show the code and the decisions, not walk you through setup.
