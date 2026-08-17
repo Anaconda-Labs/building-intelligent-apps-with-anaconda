@@ -1,1 +1,6 @@
-{"schemaVersion":1,"label":"status","message":"active","color":"brightgreen"}
+{
+  "schemaVersion": 1,
+  "label": "status",
+  "message": "needs review",
+  "color": "orange"
+}
