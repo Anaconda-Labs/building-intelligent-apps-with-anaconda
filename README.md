@@ -1,6 +1,6 @@
 # 🚀 Building Intelligent Apps with Anaconda
 
-[![Status](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Anaconda-Labs/building-intelligent-apps-with-anaconda/main/.github/badges/status.json?1786957940&cacheSeconds=300)](https://github.com/Anaconda-Labs/building-intelligent-apps-with-anaconda)
+[![Status](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/Anaconda-Labs/building-intelligent-apps-with-anaconda/main/.github/badges/status.json?1787562847&cacheSeconds=300)](https://github.com/Anaconda-Labs/building-intelligent-apps-with-anaconda)
 
 > **Mission status: Ready for lift-off**
 
